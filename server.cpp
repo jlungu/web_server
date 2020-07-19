@@ -1,12 +1,5 @@
-//
-//  server.cpp
-//  web_server
-//
-//  Created by James Lungu on 7/17/20.
-//  Copyright © 2020 James Lungu. All rights reserved.
-//
-
 #include "server.hpp"
+#include "response.hpp"
 #define PORT 8080
 
 /**
@@ -18,16 +11,18 @@ int server(int argc, const char * argv[]){
     struct sockaddr_in address;
     
     int addrlen = sizeof(address);
-    char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-    
-    
     //SOCKET CREATION
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0){
         std::cerr << "ERROR occured in socket creation." << std::endl;
         return EXIT_FAILURE;
     }
     
-    //BINDING ADDRESS TO SOCKET 
+    
+    const int trueFlag = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
+        std::cerr << "Error! " << std::endl;
+    
+    //BINDING ADDRESS TO SOCKET
     memset((char *)&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_port = htons(PORT);
@@ -57,12 +52,19 @@ int server(int argc, const char * argv[]){
         std::cout << "Client port#" << address.sin_port << " connected" << std::endl;
         char buffer[30000];
         valread = read(new_socket, buffer, 30000);
-        std::cout << buffer;
-        write(new_socket, hello, strlen(hello));
-        std::cout << hello << strlen(hello) << std::endl;
+        //MOVING TO THE RESPONSE FUNCTION. WILL FILTER OUT AND SEE WHAT WE NEED TO DO!
+        std::string response_string = generate_response(buffer);
+        if (response_string == ""){
+             close(new_socket);
+            continue;
+        }
+        //SENDING NEWLY FORMATTED REQUESTED FILE TO CLIENT
+        std::string str = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: " + std::to_string(response_string.length()) + "\n\n" + response_string;
+        const char* c = str.c_str();
+        
+        write(new_socket , c , strlen(c));//SENDING response to the client!
         std::cout << "SENT RESPONSE" << std::endl;
         close(new_socket);
     }
-    
     return 0;
 }
