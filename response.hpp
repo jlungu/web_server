@@ -18,3 +18,7 @@
 #define DELIM " "
 
 std::string generate_response(char *request);
+std::string find_content_type(std::string request);//Gives what content type we need for this
+
+
+
