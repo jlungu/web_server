@@ -1,3 +1,3 @@
-web/*
+code/web/*
 
-!web/.gitkeep
+!code/web/.gitkeep
