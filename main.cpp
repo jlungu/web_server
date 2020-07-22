@@ -10,7 +10,7 @@
 #include "server.hpp"
 
 int main(int argc, const char * argv[]) {
-    
-    server(argc, argv);
+    std::cout << "~~~~~JSERVER v0.0.0~~~~~" << std::endl;
+    server(argc, argv);//Starts our main server.
     return 0;
 }

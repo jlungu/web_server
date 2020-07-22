@@ -20,6 +20,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <fstream>
+#include <thread>
+#include <vector>
 
 //FUNCTION PROTOTYPES
 int server(int argc, const char * argv[]);//Main server function; waiting and accepting for connections

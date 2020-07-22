@@ -4,15 +4,16 @@
 /*
  Function determines the appripriate response to send to the client.
  */
-std::string generate_response(char *request){
+void *generate_response(struct client *client){
     //Need to parse the header, and see what we were given.
     std::string response_header = "";//Holds response header.
-    std::istringstream http_request(request);
+    std::istringstream http_request(client->request);
     std::string line;//LINE
     std::getline(http_request, line);//Grabbing first line, the REQUEST
     std::string line_args[3];
     std::string temp;
     int i = 0;
+    //Splicing line into 3 parts; http type, requested file, status.
     for ( std::istringstream stream(line); stream >> temp;){
         line_args[i] = temp;
         i++;
@@ -26,13 +27,11 @@ std::string generate_response(char *request){
     //We now have an array of args.
     //GET Request. Only going to support GET now.
     if (line_args[0].compare("GET") != 0){
-        return "NULL";//NULL implies error.
+        return NULL;
     }
-    
-    if (line_args[1] == "/"){
+    if (line_args[1] == "/"){//Return index.html if nothing is particularly requested.
         line_args[1] = "/index.html";
     }
-    
     //Proceeding further. Need to grab the file the GET is for.
     std::string file = "web" + line_args[1];
     std::ifstream req_file;
@@ -44,7 +43,7 @@ std::string generate_response(char *request){
         req_file.open("error_page.html");
         if (!req_file.is_open()){
             //Missing files.
-            return "ERROR";
+           return NULL;
         }
     }
     else{
@@ -59,11 +58,12 @@ std::string generate_response(char *request){
     req_file.close();
     
     std::string content_type = find_content_type(line_args[1]);//Finding content type to return.
-    if (content_type == "ERROR"){
-        content_type = "text/plain";
-    }
     std::string str = response_header + "\nContent-Type: " + content_type + "\nContent-Length: " + std::to_string(file_content.length()) + "\n\n" + file_content;
-    return str;
+    const char* resp = str.c_str();
+    send(client->socket_fd, resp , strlen(resp), 0);//SENDING response to the client!
+    close(client->socket_fd);
+    delete(client);//Freeing/deleting the client struct used.
+    return NULL;
 }
 
 /*
@@ -80,14 +80,14 @@ std::string find_content_type(std::string req){
         }
     }
     if (index == -1){
-        return "ERROR";//Errorl not a valid file.
+        return "text/plain";//Errorl not a valid file.
     }
     std::string type = req.substr(index+1, req.length()-1);
     //Parsed the file type. Seeing which content-type this corresponds to...
     if (type == "js"){
         type = "javascript";//js == javascript.
     }
-    else if (type == "ico"){//ico is weird.
+    else if (type == "ico"){//ico is weird. ico == vnd.microsoft.ico
         type = "vnd.microsoft.icon";
     }
     if (std::find(std::begin(text), std::end(text), type) != std::end(text)){
@@ -119,6 +119,6 @@ std::string find_content_type(std::string req){
         return "model/" + type;
     }
     else{
-        return "ERROR";
+        return "text/plain";
     }
 }
