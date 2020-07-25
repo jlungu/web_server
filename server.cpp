@@ -6,11 +6,10 @@
 /*
  Main function concerning our server code. Starts server, listens on port, handles requests.
  */
-int server(int argc, const char * argv[]){
+int server(std::string hostAddress, int port, std::string hostName){
     int server_fd, new_socket;
     long valread;
     struct sockaddr_in address;
-    
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //Creating, binding, and accepting connections on a socket.
     int addrlen = sizeof(address);
@@ -27,8 +26,8 @@ int server(int argc, const char * argv[]){
     //BINDING ADDRESS TO SOCKET
     memset((char *)&address, 0, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_port = htons(PORT);
-    address.sin_addr.s_addr = htonl(INADDR_ANY);
+    address.sin_port = htons(port);
+    address.sin_addr.s_addr = inet_addr(hostAddress.c_str());
     
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0){
         std::cerr << "ERROR occured in binding socket to address." << std::endl;
@@ -41,7 +40,9 @@ int server(int argc, const char * argv[]){
         return EXIT_FAILURE;
     }
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    std::cout << "WEB Server Started." << std::endl;
+    std::cout << std::endl <<  "~~~~~WEB Server Started~~~~~" << std::endl;
+    std::cout << "WEB ADDRESS: http://" << hostAddress << ":" << port << std::endl;
+    std::cout << "MACHINE: "<< hostName << std::endl;
     //CONNECTION LOOP; WAITING FOR CLIENTS
     
     std::vector<char> buffer(MAX_BUF_LENGTH);
@@ -70,4 +71,27 @@ int server(int argc, const char * argv[]){
         t.detach();//Detaching thread, so it may handle its own termination
     }
     return 0;
+}
+/*
+ Grabs host info for the web server.
+ */
+struct hostInfo getHostNetworkAddresses(){
+    char ac[80];
+    struct hostInfo h;
+    if (gethostname(ac, sizeof(ac)) < 0){
+        std::cerr << "Error when loading local host name. Exiting..." << std::endl;
+        exit(1);
+    }
+    h.hostName = std::string(ac);//Adding the host name to the struct we'll return.
+    struct hostent *phe = gethostbyname(ac);//Grabbing struct depicting host info from hostname.
+    if (phe == 0){
+        std::cerr << "BAD HOST LOOKUP" << std::endl;
+        exit(1);
+    }
+    for (int i = 0; phe->h_addr_list[i] != 0; i++){
+        struct in_addr addr;
+        memcpy(&addr, phe->h_addr_list[i], sizeof(struct in_addr));
+        h.networkAddresses.push_back(inet_ntoa(addr));//Pushing the address to our VECTOR of addresses.
+    }
+    return h;
 }

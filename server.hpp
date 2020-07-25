@@ -22,6 +22,14 @@
 #include <fstream>
 #include <thread>
 #include <vector>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+struct hostInfo {
+    std::string hostName;
+    std::vector<std::string> networkAddresses;//Vector for addresses
+};
 
 //FUNCTION PROTOTYPES
-int server(int argc, const char * argv[]);//Main server function; waiting and accepting for connections
+int server(std::string hostAddress, int port, std::string hostName);//Main server function; waiting and accepting for connections
+struct hostInfo getHostNetworkAddresses();
