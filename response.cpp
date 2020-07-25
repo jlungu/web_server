@@ -59,6 +59,7 @@ void *generate_response(struct client *client){
     
     std::string content_type = find_content_type(line_args[1]);//Finding content type to return.
     std::string str = response_header + "\nContent-Type: " + content_type + "\nContent-Length: " + std::to_string(file_content.length()) + "\n\n" + file_content;
+    std::cout << content_type << std::endl;
     const char* resp = str.c_str();
     send(client->socket_fd, resp , strlen(resp), 0);//SENDING response to the client!
     close(client->socket_fd);
@@ -89,6 +90,9 @@ std::string find_content_type(std::string req){
     }
     else if (type == "ico"){//ico is weird. ico == vnd.microsoft.ico
         type = "vnd.microsoft.icon";
+    }
+    else if (type == "svg"){//ico is weird. ico == vnd.microsoft.ico
+        type = "svg+xml";
     }
     if (std::find(std::begin(text), std::end(text), type) != std::end(text)){
         //We found the file in this content-type.
