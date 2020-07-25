@@ -1,4 +1,4 @@
-# jserve - A simple, multithreaded web-server for Linux/OSX.
+# jserve - A simple, multithreaded Linux web-server
 
 ## Basic Info
 Written in C++, this application runs an HTTP web server, servicing HTTP Requests/Responses for provided build files. Supports Linux, OSX.
