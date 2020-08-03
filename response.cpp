@@ -19,10 +19,8 @@ void *generate_response(struct client *client){
         i++;
     }
     for (int i = 0; i < 13; i++){
-        std::cout << line << std::endl;
          std::getline(http_request, line);
     }
-    std::cout << std::endl;
     
     //We now have an array of args.
     //GET Request. Only going to support GET now.
@@ -33,7 +31,11 @@ void *generate_response(struct client *client){
         line_args[1] = "/index.html";
     }
     //Proceeding further. Need to grab the file the GET is for.
-    std::string file = "web" + line_args[1];
+    std::string file;
+    if (line_args[1] == "/err_style.css")//If error page, it isnt in web directory.
+        file = "err_style.css";
+    else
+        file = "web" + line_args[1];
     std::ifstream req_file;
     req_file.open(file);//Making file input from the given file.
     if (!req_file.is_open()){
@@ -59,7 +61,6 @@ void *generate_response(struct client *client){
     
     std::string content_type = find_content_type(line_args[1]);//Finding content type to return.
     std::string str = response_header + "\nContent-Type: " + content_type + "\nContent-Length: " + std::to_string(file_content.length()) + "\n\n" + file_content;
-    std::cout << content_type << std::endl;
     const char* resp = str.c_str();
     send(client->socket_fd, resp , strlen(resp), 0);//SENDING response to the client!
     close(client->socket_fd);

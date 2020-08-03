@@ -1,3 +1,21 @@
 #main_div{
     text-align: center;
 }
+body{
+    font-family: 'Ubuntu', sans-serif;
+}
+#question_icon{
+    font-weight: lighter;
+    font-size: 200px;
+    margin-top: 5%;
+}
+#error_header{
+    margin-top: 1%;
+    margin-bottom: -1%;
+    font-size: 48px;
+}
+#error_subheader{
+    margin-top: 2%;
+    margin-bottom: 0%;
+    font-size: 32px;
+}
