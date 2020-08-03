@@ -1,5 +1,5 @@
 # jserve - A simple, multithreaded Linux web-server
-
+![](./jserve.gif)
 ## Basic Info
 Written in C++, this application runs an HTTP web server, servicing HTTP Requests/Responses for provided build files. Supports Linux, OSX.
 Utilizes multithreading to service multiple clients quickly and efficiantly.
